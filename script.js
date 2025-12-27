@@ -77,7 +77,7 @@ function win() {
   statusEl.textContent = 'Ты победила 🎉';
  
   const promo = generatePromo();
-  const botName = 'YOUR_BOT_USERNAME'; // ← заменить
+  const botName = 'tictictac';
  
   const tgLink = `https://t.me/${botName}?start=promo_${promo}`;
  
