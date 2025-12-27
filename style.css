@@ -69,6 +69,6 @@ button {
   text-decoration: none;
   background: #c9e7ff;
   padding: 12px;
-  border-radius: 999px;
-  display: inline-block;
+  border-radius: 999x;
+  text-align: center;
 }
