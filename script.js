@@ -57,7 +57,7 @@ function checkEnd() {
       if (board[a] === '❌') {
         win();
       } else {
-        statusEl.textContent = 'Ой! Я нечаянно :)\n Попробуешь ещё раз? 💕';
+        statusEl.textContent = 'Ой! Попробуешь ещё раз? 💕';
       }
       return true;
     }
