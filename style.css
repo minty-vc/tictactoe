@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fdeff4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+ 
+.game {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 20px;
+  width: 320px;
+  text-align: center;
+}
+ 
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+ 
+.cell {
+  height: 80px;
+  background: #f8d7e4;
+  border-radius: 16px;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+ 
+.cell:hover {
+  background: #f3bfd4;
+}
+ 
+button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: none;
+  background: #f3bfd4;
+  cursor: pointer;
+}
+ 
+a.telegram-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  background: #c7e6ff;
+  color: #000;
+  text-decoration: none;
+}
