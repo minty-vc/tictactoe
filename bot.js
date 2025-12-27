@@ -1,22 +1,74 @@
-const TelegramBot = require('node-telegram-bot-api');
+/**
+ * Telegram bot + dummy HTTP server
+ * Работает как Web Service на Render (free tier)
+ */
  
-const TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
-const bot = new TelegramBot(TOKEN, { polling: true });
+import express from 'express';
+import TelegramBot from 'node-telegram-bot-api';
  
-// /start с параметром
-bot.onText(/\/start(?:\s+promo_(\d{5}))?/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const promo = match?.[1];
+// ==================
+// HTTP SERVER (нужен Render)
+// ==================
  
-  if (promo) {
-    bot.sendMessage(
-      chatId,
-      `🎉 Победа!\nПромокод выдан: ${promo}`
-    );
-  } else {
-    bot.sendMessage(
-      chatId,
-      'Привет! 🌸\nСыграй в игру и получи промокод 💕'
-    );
-  }
+const app = express();
+const PORT = process.env.PORT || 3000;
+ 
+app.get('/', (req, res) => {
+  res.send('Telegram bot is running');
 });
+ 
+app.listen(PORT, () => {
+  console.log(`HTTP server listening on port ${PORT}`);
+});
+ 
+// ==================
+// TELEGRAM BOT
+// ==================
+ 
+const BOT_TOKEN = process.env.BOT_TOKEN;
+ 
+// защита от забывчивости
+if (!BOT_TOKEN) {
+  console.error('❌ BOT_TOKEN is not defined');
+  process.exit(1);
+}
+ 
+const bot = new TelegramBot(BOT_TOKEN, {
+  polling: true
+});
+ 
+// сохраняем chat_id пользователя,
+// который написал боту /start
+let userChatId = null;
+ 
+// команда /start
+bot.onText(/\/start/, (msg) => {
+  userChatId = msg.chat.id;
+ 
+  bot.sendMessage(
+    userChatId,
+    'Привет! 🌸\nПопробуй нашу игру! ❤️'
+  );
+ 
+  console.log('User chat_id saved:', userChatId);
+});
+ 
+// ==================
+// ОТПРАВКА ПРОМОКОДА
+// ==================
+ 
+/**
+ * Вызывай эту функцию,
+ * когда игрок победил в игре
+ */
+export function sendPromoCode(promoCode) {
+  if (!userChatId) {
+    console.warn('⚠️ Chat ID is not set yet');
+    return;
+  }
+ 
+  bot.sendMessage(
+    userChatId,
+    `🎉 Победа!\nПромокод выдан: ${promoCode}`
+  );
+}
