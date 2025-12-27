@@ -1,5 +1,5 @@
 {
-  "name": "telegram-promo-bot",
+  "name": "tictactoe-telegram-bot",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
