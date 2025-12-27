@@ -2,137 +2,84 @@ const cells = document.querySelectorAll('.cell');
 const statusText = document.getElementById('status');
 const restartBtn = document.getElementById('restart');
 const tgLink = document.getElementById('tg-link');
- 
-const RENDER_URL = 'https://ТВОЙ-RENDER-URL/send-promo';
- 
+
+const BACKEND_URL = 'https://tictactoe-bm3a.onrender.com';
+
 let board = Array(9).fill(null);
 let gameActive = true;
- 
+
 const PLAYER = '❌';
-const BOT = '⭕';
- 
-const winPatterns = [
-  [0,1,2], [3,4,5], [6,7,8],
-  [0,3,6], [1,4,7], [2,5,8],
-  [0,4,8], [2,4,6]
+const BOT = '⭕️';
+
+const wins = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
 ];
- 
-// =======================
-// INIT
-// =======================
- 
-cells.forEach((cell, index) => {
-  cell.addEventListener('click', () => handlePlayerMove(index));
+
+cells.forEach((cell, i) => {
+  cell.addEventListener('click', () => {
+    if (!gameActive || board[i]) return;
+
+    board[i] = PLAYER;
+    cell.textContent = PLAYER;
+
+    if (checkWin(PLAYER)) return win();
+    if (draw()) return tie();
+
+    setTimeout(botMove, 400);
+  });
 });
- 
-restartBtn.addEventListener('click', resetGame);
- 
-// =======================
-// GAME LOGIC
-// =======================
- 
-function handlePlayerMove(index) {
-  if (!gameActive || board[index]) return;
- 
-  makeMove(index, PLAYER);
- 
-  if (checkWin(PLAYER)) {
-    handleWin();
-    return;
-  }
- 
-  if (isDraw()) {
-    handleDraw();
-    return;
-  }
- 
-  setTimeout(botMove, 400);
-}
- 
+
+restartBtn.onclick = reset;
+
 function botMove() {
-  const empty = board
-    .map((v, i) => v === null ? i : null)
-    .filter(v => v !== null);
- 
-  if (empty.length === 0) return;
- 
-  const index = empty[Math.floor(Math.random() * empty.length)];
-  makeMove(index, BOT);
- 
-  if (checkWin(BOT)) {
-    handleLose();
-    return;
-  }
- 
-  if (isDraw()) {
-    handleDraw();
-  }
+  const empty = board.map((v,i)=>v?null:i).filter(v=>v!==null);
+  const i = empty[Math.floor(Math.random()*empty.length)];
+  board[i] = BOT;
+  cells[i].textContent = BOT;
+
+  if (checkWin(BOT)) lose();
+  else if (draw()) tie();
 }
- 
-function makeMove(index, symbol) {
-  board[index] = symbol;
-  cells[index].textContent = symbol;
-}
- 
-// =======================
-// STATES
-// =======================
- 
-function handleWin() {
+
+function win() {
   gameActive = false;
- 
-  const promoCode = generatePromoCode();
- 
-  statusText.textContent = `Умница! Вот твой промокод: ${promoCode} 🎁`;
- 
+  const code = Math.floor(10000 + Math.random() * 90000);
+  statusText.textContent = `Умница! Вот твой промокод: ${code} 🎁`;
   restartBtn.style.display = 'none';
-  tgLink.style.display = 'inline-block';
-  tgLink.href = 'https://t.me/ИМЯ_ТВОЕГО_БОТА';
- 
-  fetch(RENDER_URL, {
+  tgLink.style.display = 'block';
+
+  fetch(BACKEND_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ promoCode })
-  }).catch(() => {
-    console.warn('Failed to send promo to backend');
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ promoCode: code })
   });
 }
- 
-function handleLose() {
+
+function lose() {
   gameActive = false;
-  statusText.textContent = 'Ой, сегодня не твой день, попробуешь ещё раз? 💕';
+  statusText.textContent = 'Ой, я случайно! Попробуешь ещё раз? 💕';
 }
- 
-function handleDraw() {
+
+function tie() {
   gameActive = false;
   statusText.textContent = 'Ой, ничья! Попробуй ещё раз 💖';
 }
- 
-// =======================
-// HELPERS
-// =======================
- 
-function checkWin(player) {
-  return winPatterns.some(pattern =>
-    pattern.every(i => board[i] === player)
-  );
-}
- 
-function isDraw() {
-  return board.every(cell => cell !== null);
-}
- 
-function resetGame() {
-  board = Array(9).fill(null);
-  gameActive = true;
- 
-  cells.forEach(cell => cell.textContent = '');
- 
+
+function reset() {
+  board.fill(null);
+  cells.forEach(c => c.textContent = '');
   statusText.textContent = 'Твой ход 💖';
-  restartBtn.style.display = 'inline-block';
+  gameActive = true;
+  restartBtn.style.display = 'block';
   tgLink.style.display = 'none';
 }
- 
-function generatePromoCode() {
-  return Math.floor(10000 + Math.random() * 90000);
+
+function checkWin(p) {
+  return wins.some(w => w.every(i => board[i] === p));
+}
+
+function draw() {
+  return board.every(c => c);
 }
