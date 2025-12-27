@@ -9,7 +9,7 @@ let gameActive = true;
 const PLAYER = 'X';
 const BOT = 'O';
 
-const winCombos = [
+const WIN_COMBOS = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
   [0,4,8],[2,4,6]
@@ -18,7 +18,7 @@ const winCombos = [
 function handleCellClick(e) {
   const index = e.target.dataset.index;
 
-  if (board[index] !== '' || !gameActive) return;
+  if (!gameActive || board[index] !== '') return;
 
   makeMove(index, PLAYER);
 
@@ -41,13 +41,13 @@ function makeMove(index, player) {
 }
 
 function botMove() {
-  const emptyCells = board
-    .map((val, idx) => val === '' ? idx : null)
+  const empty = board
+    .map((v, i) => v === '' ? i : null)
     .filter(v => v !== null);
 
-  if (emptyCells.length === 0) return;
+  if (!empty.length) return;
 
-  const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  const move = empty[Math.floor(Math.random() * empty.length)];
   makeMove(move, BOT);
 
   if (checkWin(BOT)) {
@@ -61,8 +61,8 @@ function botMove() {
 }
 
 function checkWin(player) {
-  return winCombos.some(combo =>
-    combo.every(index => board[index] === player)
+  return WIN_COMBOS.some(combo =>
+    combo.every(i => board[i] === player)
   );
 }
 
@@ -75,10 +75,10 @@ function handleWin() {
 
   const promo = Math.floor(10000 + Math.random() * 90000);
 
-  statusText.textContent = `Умница! Вот твой промокод: ${promo} 🎁`;
+  statusText.textContent = `Умница! Вот твой промокод: ${promo} 🎉`;
 
   tgLink.href =ument.querySelectorAll('.cell');
-const statusText = d
+const statusText 
   tgLink.style.display = 'block';
 
   restartBtn.style.display = 'none';
@@ -86,13 +86,13 @@ const statusText = d
 
 function handleLose() {
   gameActive = false;
-  statusText.textContent = 'Ой, сегодня не твой день 😢 Попробуешь ещё раз?';
+  statusText.textContent = 'Ой, сегодня не твой день, попробуешь ещё раз? 💕';
   restartBtn.style.display = 'block';
 }
 
 function handleDraw() {
   gameActive = false;
-  statusText.textContent = 'Ничья! Попробуй ещё раз 🤝';
+  statusText.textContent = 'Ой, ничья! Попробуй ещё раз 🤍';
   restartBtn.style.display = 'block';
 }
 
