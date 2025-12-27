@@ -1,20 +1,43 @@
 /**
- * Telegram bot + HTTP server
- * ВРЕМЕННО: токен захардкожен
+ * Telegram bot + HTTP API
+ * Работает как Web Service на Render (free tier)
  */
  
 import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
  
 // ==================
-// HTTP SERVER (для Render)
+// CONFIG
+// ==================
+ 
+const BOT_TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
+const PORT = process.env.PORT || 3000;
+ 
+// ==================
+// HTTP SERVER
 // ==================
  
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
  
 app.get('/', (req, res) => {
   res.send('Bot is running');
+});
+ 
+// endpoint, который дергает фронт при победе
+app.post('/win', (req, res) => {
+  const { promoCode } = req.body;
+ 
+  if (!userChatId) {
+    return res.status(400).json({ error: 'Chat ID not set' });
+  }
+ 
+  bot.sendMessage(
+    userChatId,
+    `🎉 Победа!\nПромокод выдан: ${promoCode}`
+  );
+ 
+  res.json({ status: 'ok' });
 });
  
 app.listen(PORT, () => {
@@ -25,11 +48,7 @@ app.listen(PORT, () => {
 // TELEGRAM BOT
 // ==================
  
-const BOT_TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
- 
-const bot = new TelegramBot(BOT_TOKEN, {
-  polling: true
-});
+const bot = new TelegramBot(BOT_TOKEN, { polling: true });
  
 let userChatId = null;
  
@@ -43,22 +62,3 @@ bot.onText(/\/start/, (msg) => {
  
   console.log('Saved chat_id:', userChatId);
 });
- 
-// ==================
-// ОТПРАВКА ПРОМОКОДА
-// ==================
- 
-function sendPromoCode(promoCode) {
-  if (!userChatId) {
-    console.log('Chat ID not set');
-    return;
-  }
- 
-  bot.sendMessage(
-    userChatId,
-    `🎉 Победа!\nПромокод выдан: ${promoCode}`
-  );
-}
- 
-// временно экспорт не нужен, но оставим
-export { sendPromoCode };
