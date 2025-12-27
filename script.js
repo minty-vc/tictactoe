@@ -1,106 +1,164 @@
-const boardEl = document.getElementById('board');
-const statusEl = document.getElementById('status');
-const resultEl = document.getElementById('result');
+// ======================
+// НАСТРОЙКИ
+// ======================
+
+const BACKEND_URL = 'https://tictactoe-bm3a.onrender.com';
+ 
+// ======================
+// DOM
+// ======================
+ 
+const cells = document.querySelectorAll('.cell');
+const statusText = document.getElementById('status');
 const restartBtn = document.getElementById('restart');
  
-let board = Array(9).fill(null);
-let gameOver = false;
+// ======================
+// ИГРОВЫЕ ДАННЫЕ
+// ======================
  
-const wins = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
+let board = Array(9).fill(null);
+let gameActive = true;
+ 
+const PLAYER = 'X';
+const AI = 'O';
+ 
+const WIN_COMBINATIONS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
 ];
  
-// отрисовка поля
-function render() {
-  boardEl.innerHTML = '';
-  board.forEach((cell, i) => {
-    const div = document.createElement('div');
-    div.className = 'cell';
-    div.textContent = cell || '';
-    div.onclick = () => move(i);
-    boardEl.appendChild(div);
+// ======================
+// ИНИЦИАЛИЗАЦИЯ
+// ======================
+ 
+cells.forEach((cell, index) => {
+  cell.addEventListener('click', () => handleCellClick(index));
+});
+ 
+restartBtn.addEventListener('click', restartGame);
+ 
+// ======================
+// ОСНОВНАЯ ЛОГИКА
+// ======================
+ 
+function handleCellClick(index) {
+  if (!gameActive || board[index] !== null) return;
+ 
+  makeMove(index, PLAYER);
+ 
+  if (checkWin(PLAYER)) {
+    handlePlayerWin();
+    return;
+  }
+ 
+  if (checkDraw()) {
+    handleDraw();
+    return;
+  }
+ 
+  setTimeout(makeAIMove, 500);
+}
+ 
+function makeAIMove() {
+  if (!gameActive) return;
+ 
+  const emptyCells = board
+    .map((value, index) => (value === null ? index : null))
+    .filter(index => index !== null);
+ 
+  const randomIndex =
+    emptyCells[Math.floor(Math.random() * emptyCells.length)];
+ 
+  makeMove(randomIndex, AI);
+ 
+  if (checkWin(AI)) {
+    handlePlayerLose();
+    return;
+  }
+ 
+  if (checkDraw()) {
+    handleDraw();
+  }
+}
+ 
+function makeMove(index, symbol) {
+  board[index] = symbol;
+  cells[index].textContent = symbol;
+}
+ 
+// ======================
+// ПРОВЕРКИ
+// ======================
+ 
+function checkWin(symbol) {
+  return WIN_COMBINATIONS.some(combination =>
+    combination.every(index => board[index] === symbol)
+  );
+}
+ 
+function checkDraw() {
+  return board.every(cell => cell !== null);
+}
+ 
+// ======================
+// СОСТОЯНИЯ ИГРЫ
+// ======================
+ 
+function handlePlayerWin() {
+  gameActive = false;
+ 
+  const promoCode = generatePromoCode();
+ 
+  statusText.textContent = `Ты победила 🎉\nТвой промокод: ${promoCode}`;
+ 
+  sendPromoCodeToBot(promoCode);
+}
+ 
+function handlePlayerLose() {
+  gameActive = false;
+  statusText.textContent =
+    'Сегодня не твой день, попробуешь ещё раз? 💕';
+}
+ 
+function handleDraw() {
+  gameActive = false;
+  statusText.textContent = 'Ничья 🤍';
+}
+ 
+// ======================
+// ПРОМОКОД + BACKEND
+// ======================
+ 
+function generatePromoCode() {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+}
+ 
+function sendPromoCodeToBot(promoCode) {
+  fetch(`${BACKEND_URL}/win`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ promoCode })
+  }).catch(() => {
+    // для тестового задания ошибки можно игнорировать
   });
 }
  
-// ход игрока
-function move(i) {
-  if (board[i] || gameOver) return;
+// ======================
+// РЕСТАРТ
+// ======================
  
-  board[i] = '❌';
-  if (checkEnd()) return;
- 
-  computerMove();
-  checkEnd();
-  render();
-}
- 
-// ход компьютера (рандом)
-function computerMove() {
-  const empty = board
-    .map((v, i) => v ? null : i)
-    .filter(v => v !== null);
- 
-  if (!empty.length) return;
- 
-  const move = empty[Math.floor(Math.random() * empty.length)];
-  board[move] = '⭕';
-}
- 
-// проверка победы / поражения / ничьи
-function checkEnd() {
-  for (const [a,b,c] of wins) {
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-      gameOver = true;
- 
-      if (board[a] === '❌') {
-        win();
-      } else {
-        statusEl.textContent = 'Ой! Попробуешь ещё раз? 💕';
-      }
-      return true;
-    }
-  }
- 
-  if (!board.includes(null)) {
-    gameOver = true;
-    statusEl.textContent = 'Ничья 🌸';
-    return true;
-  }
- 
-  return false;
-}
- 
-// победа игрока
-function win() {
-  statusEl.textContent = 'Ты победила 🎉';
- 
-  const promo = generatePromo();
-  const botName = 'tictictacbot';
- 
-  const tgLink = `https://t.me/${botName}?start=promo_${promo}`;
- 
-  resultEl.innerHTML = `
-    <div>Твой промокод: <strong>${promo}</strong></div>
-    <a class="telegram-btn" href="${tgLink}" target="_blank">
-      Получить в Telegram 💌
-    </a>
-  `;
-}
- 
-// генерация 5-значного кода
-function generatePromo() {
-  return Math.floor(10000 + Math.random() * 90000);
-}
- 
-// рестарт
-restartBtn.onclick = () => {
+function restartGame() {
   board = Array(9).fill(null);
-  gameOver = false;
-  statusEl.textContent = 'Твой ход 💕';
-  resultEl.innerHTML = '';
-  render();
-};
+  gameActive = true;
  
-render();
+  cells.forEach(cell => (cell.textContent = ''));
+  statusText.textContent = '';
+}
