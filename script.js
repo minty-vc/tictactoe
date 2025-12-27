@@ -3,83 +3,112 @@ const statusText = document.getElementById('status');
 const restartBtn = document.getElementById('restart');
 const tgLink = document.getElementById('tg-link');
 
-const BACKEND_URL = 'https://tictactoe-bm3a.onrender.com';
-
-let board = Array(9).fill(null);
+let board = ['', '', '', '', '', '', '', '', ''];
 let gameActive = true;
 
-const PLAYER = '❌';
-const BOT = '⭕️';
+const PLAYER = 'X';
+const BOT = 'O';
 
-const wins = [
+const winCombos = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
   [0,4,8],[2,4,6]
 ];
 
-cells.forEach((cell, i) => {
-  cell.addEventListener('click', () => {
-    if (!gameActive || board[i]) return;
+function handleCellClick(e) {
+  const index = e.target.dataset.index;
 
-    board[i] = PLAYER;
-    cell.textContent = PLAYER;
+  if (board[index] !== '' || !gameActive) return;
 
-    if (checkWin(PLAYER)) return win();
-    if (draw()) return tie();
+  makeMove(index, PLAYER);
 
-    setTimeout(botMove, 400);
-  });
-});
+  if (checkWin(PLAYER)) {
+    handleWin();
+    return;
+  }
 
-restartBtn.onclick = reset;
+  if (isDraw()) {
+    handleDraw();
+    return;
+  }
+
+  setTimeout(botMove, 400);
+}
+
+function makeMove(index, player) {
+  board[index] = player;
+  cells[index].textContent = player;
+}
 
 function botMove() {
-  const empty = board.map((v,i)=>v?null:i).filter(v=>v!==null);
-  const i = empty[Math.floor(Math.random()*empty.length)];
-  board[i] = BOT;
-  cells[i].textContent = BOT;
+  const emptyCells = board
+    .map((val, idx) => val === '' ? idx : null)
+    .filter(v => v !== null);
 
-  if (checkWin(BOT)) lose();
-  else if (draw()) tie();
+  if (emptyCells.length === 0) return;
+
+  const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  makeMove(move, BOT);
+
+  if (checkWin(BOT)) {
+    handleLose();
+    return;
+  }
+
+  if (isDraw()) {
+    handleDraw();
+  }
 }
 
-function win() {
+function checkWin(player) {
+  return winCombos.some(combo =>
+    combo.every(index => board[index] === player)
+  );
+}
+
+function isDraw() {
+  return board.every(cell => cell !== '');
+}
+
+function handleWin() {
   gameActive = false;
-  const code = Math.floor(10000 + Math.random() * 90000);
-  statusText.textContent = `Умница! Вот твой промокод: ${code} 🎁`;
-  restartBtn.style.display = 'none';
+
+  const promo = Math.floor(10000 + Math.random() * 90000);
+
+  statusText.textContent = `Умница! Вот твой промокод: ${promo} 🎁`;
+
+  tgLink.href =ument.querySelectorAll('.cell');
+const statusText = d
   tgLink.style.display = 'block';
 
-  fetch(BACKEND_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ promoCode: code })
-  });
+  restartBtn.style.display = 'none';
 }
 
-function lose() {
+function handleLose() {
   gameActive = false;
-  statusText.textContent = 'Ой, я случайно! Попробуешь ещё раз? 💕';
-}
-
-function tie() {
-  gameActive = false;
-  statusText.textContent = 'Ой, ничья! Попробуй ещё раз 💖';
-}
-
-function reset() {
-  board.fill(null);
-  cells.forEach(c => c.textContent = '');
-  statusText.textContent = 'Твой ход 💖';
-  gameActive = true;
+  statusText.textContent = 'Ой, сегодня не твой день 😢 Попробуешь ещё раз?';
   restartBtn.style.display = 'block';
+}
+
+function handleDraw() {
+  gameActive = false;
+  statusText.textContent = 'Ничья! Попробуй ещё раз 🤝';
+  restartBtn.style.display = 'block';
+}
+
+function restartGame() {
+  board = ['', '', '', '', '', '', '', '', ''];
+  gameActive = true;
+
+  cells.forEach(cell => cell.textContent = '');
+
+  statusText.textContent = 'Твой ход ❤️';
   tgLink.style.display = 'none';
+  restartBtn.style.display = 'block';
 }
 
-function checkWin(p) {
-  return wins.some(w => w.every(i => board[i] === p));
-}
+cells.forEach(cell =>
+  cell.addEventListener('click', handleCellClick)
+);
 
-function draw() {
-  return board.every(c => c);
-}
+restartBtn.addEventListener('click', restartGame);
