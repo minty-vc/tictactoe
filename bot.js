@@ -1,64 +1,72 @@
-/**
- * Telegram bot + HTTP API
- * Работает как Web Service на Render (free tier)
- */
- 
 import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
- 
-// ==================
-// CONFIG
-// ==================
- 
-const BOT_TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
-const PORT = process.env.PORT || 3000;
- 
-// ==================
-// HTTP SERVER
-// ==================
  
 const app = express();
 app.use(express.json());
  
+const PORT = process.env.PORT || 3000;
+ 
+// ======================
+// TELEGRAM BOT
+// ======================
+ 
+const BOT_TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
+ 
+const bot = new TelegramBot(BOT_TOKEN, {
+  polling: true
+});
+ 
+let savedChatId = null;
+ 
+// /start — сохраняем chat_id
+bot.onText(/\/start/, (msg) => {
+  savedChatId = msg.chat.id;
+ 
+  bot.sendMessage(
+    savedChatId,
+    'Привет! 🌸\nПопробуй нашу игру! ❤️'
+  );
+ 
+  console.log('Saved chat_id:', savedChatId);
+});
+ 
+// ======================
+// HTTP API
+// ======================
+ 
+// healthcheck для Render
 app.get('/', (req, res) => {
   res.send('Bot is running');
 });
  
-// endpoint, который дергает фронт при победе
-app.post('/win', (req, res) => {
+// endpoint для победы
+app.post('/send-promo', (req, res) => {
   const { promoCode } = req.body;
  
-  if (!userChatId) {
-    return res.status(400).json({ error: 'Chat ID not set' });
+  if (!savedChatId) {
+    return res.status(400).json({
+      error: 'User has not pressed /start yet'
+    });
+  }
+ 
+  if (!promoCode) {
+    return res.status(400).json({
+      error: 'promoCode is required'
+    });
   }
  
   bot.sendMessage(
-    userChatId,
-    `🎉 Победа!\nПромокод выдан: ${promoCode}`
+    savedChatId,
+    `🎉 Победа!\nВот твой промокод: ${promoCode}\n\nИграй ещё, чтобы получить больше промокодов! 💖`
   );
  
-  res.json({ status: 'ok' });
+  res.json({ success: true });
 });
+ 
+// ======================
+// START SERVER
+// ======================
  
 app.listen(PORT, () => {
-  console.log(`HTTP server listening on port ${PORT}`);
-});
- 
-// ==================
-// TELEGRAM BOT
-// ==================
- 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
- 
-let userChatId = null;
- 
-bot.onText(/\/start/, (msg) => {
-  userChatId = msg.chat.id;
- 
-  bot.sendMessage(
-    userChatId,
-    'Привет! 🌸\nПопробуй нашу игру! ❤️'
-  );
- 
-  console.log('Saved chat_id:', userChatId);
+  console.log(`Server running on port ${PORT}`);
 });
