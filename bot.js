@@ -1,28 +1,25 @@
-import express from 'express';
-import TelegramBot from 'node-telegram-bot-api';
+const TelegramBot = require('node-telegram-bot-api');
 
-const app = express();
-app.use(express.json());
+const TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0'; // временно можно хардкод
+const bot = new TelegramBot(TOKEN, { polling: true });
 
-const bot = new TelegramBot(
-  '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0',
-  { polling: true }
-);
+bot.onText(/\/start(.*)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const payload = match[1]?.trim();
 
-let chatId = null;
+  if (payload && payload.startsWith('promo_')) {
+    const promoCode = payload.replace('promo_', '');
 
-bot.onText(/\/start/, msg => {
-  chatId = msg.chat.id;
-  bot.sendMessage(chatId, 'Попробуй нашу игру! ❤️');
+    bot.sendMessage(
+      chatId,
+      `🎉 Победа!\n\nВот твой промокод: ${promoCode}\n\nИграй ещё, чтобы получить больше 💖`
+    );
+  } else {
+    bot.sendMessage(
+      chatId,
+      'Попробуй нашу игру 🎮\n\n👉 https://minty-vc.github.io/tictactoe/'
+    );
+  }
 });
 
-app.post('/send-promo', (req, res) => {
-  if (!chatId) return res.sendStatus(400);
-  bot.sendMessage(
-    chatId,
-    `Вот твой промокод: ${req.body.promoCode}\nИграй ещё! 💖`
-  );
-  res.json({ ok: true });
-});
-
-app.listen(process.env.PORT || 3000);
+console.log('🤖 Telegram bot is running');
