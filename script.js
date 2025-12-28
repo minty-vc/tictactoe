@@ -71,7 +71,7 @@ function endGame(type) {
   if (type === "win") {
     const promo = generatePromo();
     resultTextEl.textContent = `Умница! Вот твой промокод: ${promo}`;
-    tgBtn.href =E = "https://t.me/tictictacbot?start=promo_${promo}";
+    tgBtn.href =E = "https://t.me/tictictacbot";
 
 const boardEl = document.getElem
     tgBtn.classList.remove("hidden");
