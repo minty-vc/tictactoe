@@ -70,7 +70,7 @@ function endGame(type) {
 
   if (type === "win") {
     const promo = generatePromo();
-    resultTextEl.textContent = `Умница! Вот твой промокод: ${promo}`;
+    resultTextEl.textContent = `Умница! Вот твой промокод: ${promo}\nДля его активации перейди в наш Telegram-бот`;
     tgBtn.href =E = "https://t.me/tictictacbot";
 
 const boardEl = document.getElem
