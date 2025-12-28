@@ -5,9 +5,7 @@ const resultText = document.getElementById('result-text');
 const retryBtn = document.getElementById('retry-btn');
 const tgBtn = document.getElementById('tg-btn');
 
-const BACKEND_URL = 'https://tictactoe-bm3a.onrender.com';
-
-const BOT_URL = 'https://t.me/tictictacbot';
+const BOT_USERNAME = 'tictictacbot';
 
 let cells = [];
 let gameOver = false;
@@ -28,37 +26,28 @@ function startGame() {
   }
 }
 
-function playerMove(index) {
-  if (cells[index] || gameOver) return;
+function playerMove(i) {
+  if (cells[i] || gameOver) return;
 
-  cells[index] = 'X';
+  cells[i] = 'X';
   render();
 
-  if (checkWin('X')) {
-    win();
-    return;
-  }
-
-  if (cells.every(Boolean)) {
-    draw();
-    return;
-  }
+  if (checkWin('X')) return win();
+  if (cells.every(Boolean)) return draw();
 
   aiMove();
 }
 
 function aiMove() {
-  const emptyCells = cells
+  const empty = cells
     .map((v, i) => (v ? null : i))
     .filter(v => v !== null);
 
-  const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  const move = empty[Math.floor(Math.random() * empty.length)];
   cells[move] = 'O';
   render();
 
-  if (checkWin('O')) {
-    lose();
-  }
+  if (checkWin('O')) lose();
 }
 
 function render() {
@@ -67,16 +56,13 @@ function render() {
   });
 }
 
-function checkWin(player) {
+function checkWin(p) {
   const wins = [
     [0,1,2],[3,4,5],[6,7,8],
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
-
-  return wins.some(line =>
-    line.every(i => cells[i] === player)
-  );
+  return wins.some(w => w.every(i => cells[i] === p));
 }
 
 function win() {
@@ -84,14 +70,9 @@ function win() {
 
   const promo = Math.floor(10000 + Math.random() * 90000).toString();
 
-  fetch(`${BACKEND_URL}/promo`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ promo })
-  });
-
   resultText.textContent = `Умница! Вот твой промокод: ${promo}`;
-  tgBtn.href = BOT_URL;
+  tgBtn.href =ocument.getElementById('board');
+const statusText = d
   tgBtn.classList.remove('hidden');
   result.classList.remove('hidden');
 }
@@ -99,14 +80,14 @@ function win() {
 function lose() {
   gameOver = true;
   resultText.textContent =
-    'Ой, сегодня не твой день, попробуешь ещё раз?';
+    'Ой, сегодня не твой день, попробуешь ещё раз? 💕';
   result.classList.remove('hidden');
 }
 
 function draw() {
   gameOver = true;
   resultText.textContent =
-    'Ой, ничья! Попробуй ещё раз';
+    'Ой, ничья! Попробуй ещё раз 😊';
   result.classList.remove('hidden');
 }
 
