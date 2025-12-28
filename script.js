@@ -1,114 +1,115 @@
-const cells = document.querySelectorAll('.cell');
+const board = document.getElementById('board');
 const statusText = document.getElementById('status');
-const restartBtn = document.getElementById('restart');
-const tgLink = document.getElementById('tg-link');
+const result = document.getElementById('result');
+const resultText = document.getElementById('result-text');
+const retryBtn = document.getElementById('retry-btn');
+const tgBtn = document.getElementById('tg-btn');
 
-let board = ['', '', '', '', '', '', '', '', ''];
-let gameActive = true;
+const BACKEND_URL = 'https://tictactoe-bm3a.onrender.com';
 
-const PLAYER = 'X';
-const BOT = 'O';
+const BOT_URL = 'https://t.me/tictictacbot';
 
-const WIN_COMBOS = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-];
+let cells = [];
+let gameOver = false;
 
-function handleCellClick(e) {
-  const index = e.target.dataset.index;
+function startGame() {
+  board.innerHTML = '';
+  result.classList.add('hidden');
+  tgBtn.classList.add('hidden');
+  statusText.textContent = 'Твой ход';
+  gameOver = false;
+  cells = Array(9).fill(null);
 
-  if (!gameActive || board[index] !== '') return;
+  for (let i = 0; i < 9; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'cell';
+    btn.onclick = () => playerMove(i);
+    board.appendChild(btn);
+  }
+}
 
-  makeMove(index, PLAYER);
+function playerMove(index) {
+  if (cells[index] || gameOver) return;
 
-  if (checkWin(PLAYER)) {
-    handleWin();
+  cells[index] = 'X';
+  render();
+
+  if (checkWin('X')) {
+    win();
     return;
   }
 
-  if (isDraw()) {
-    handleDraw();
+  if (cells.every(Boolean)) {
+    draw();
     return;
   }
 
-  setTimeout(botMove, 400);
+  aiMove();
 }
 
-function makeMove(index, player) {
-  board[index] = player;
-  cells[index].textContent = player;
-}
-
-function botMove() {
-  const empty = board
-    .map((v, i) => v === '' ? i : null)
+function aiMove() {
+  const emptyCells = cells
+    .map((v, i) => (v ? null : i))
     .filter(v => v !== null);
 
-  if (!empty.length) return;
+  const move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  cells[move] = 'O';
+  render();
 
-  const move = empty[Math.floor(Math.random() * empty.length)];
-  makeMove(move, BOT);
-
-  if (checkWin(BOT)) {
-    handleLose();
-    return;
+  if (checkWin('O')) {
+    lose();
   }
+}
 
-  if (isDraw()) {
-    handleDraw();
-  }
+function render() {
+  document.querySelectorAll('.cell').forEach((btn, i) => {
+    btn.textContent = cells[i] || '';
+  });
 }
 
 function checkWin(player) {
-  return WIN_COMBOS.some(combo =>
-    combo.every(i => board[i] === player)
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  return wins.some(line =>
+    line.every(i => cells[i] === player)
   );
 }
 
-function isDraw() {
-  return board.every(cell => cell !== '');
+function win() {
+  gameOver = true;
+
+  const promo = Math.floor(10000 + Math.random() * 90000).toString();
+
+  fetch(`${BACKEND_URL}/promo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ promo })
+  });
+
+  resultText.textContent = `Умница! Вот твой промокод: ${promo}`;
+  tgBtn.href = BOT_URL;
+  tgBtn.classList.remove('hidden');
+  result.classList.remove('hidden');
 }
 
-function handleWin() {
-  gameActive = false;
-
-  const promo = Math.floor(10000 + Math.random() * 90000);
-
-  statusText.textContent = `Умница! Вот твой промокод: ${promo} 🎉`;
-
-  tgLink.href =ument.querySelectorAll('.cell');
-const statusText 
-  tgLink.style.display = 'block';
-
-  restartBtn.style.display = 'none';
+function lose() {
+  gameOver = true;
+  resultText.textContent =
+    'Ой, сегодня не твой день, попробуешь ещё раз?';
+  result.classList.remove('hidden');
 }
 
-function handleLose() {
-  gameActive = false;
-  statusText.textContent = 'Ой, сегодня не твой день, попробуешь ещё раз? 💕';
-  restartBtn.style.display = 'block';
+function draw() {
+  gameOver = true;
+  resultText.textContent =
+    'Ой, ничья! Попробуй ещё раз';
+  result.classList.remove('hidden');
 }
 
-function handleDraw() {
-  gameActive = false;
-  statusText.textContent = 'Ой, ничья! Попробуй ещё раз 🤍';
-  restartBtn.style.display = 'block';
-}
+retryBtn.onclick = startGame;
 
-function restartGame() {
-  board = ['', '', '', '', '', '', '', '', ''];
-  gameActive = true;
-
-  cells.forEach(cell => cell.textContent = '');
-
-  statusText.textContent = 'Твой ход ❤️';
-  tgLink.style.display = 'none';
-  restartBtn.style.display = 'block';
-}
-
-cells.forEach(cell =>
-  cell.addEventListener('click', handleCellClick)
-);
-
-restartBtn.addEventListener('click', restartGame);
+startGame();
