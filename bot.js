@@ -1,31 +1,45 @@
-const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
+const TelegramBot = require('node-telegram-bot-api');
 
 const TOKEN = '8535903290:AAHU0RC-WEPiuCJVhADRA7hp81BndRWZre0';
 
-const bot = new TelegramBot(TOKEN, { polling: true });
 const app = express();
+const bot = new TelegramBot(TOKEN, { polling: true });
 
-bot.onText(/\/start(.*)/, (msg, match) => {
+/**
+ * /start и /start promo_XXXX
+ */
+bot.onText(/\/start(?:\s(.+))?/, (msg, match) => {
   const chatId = msg.chat.id;
-  const payload = match[1].trim();
+  const payload = match && match[1];
 
-  if (payload.startsWith('promo_')) {
+  // Если есть промокод
+  if (payload && payload.startsWith('promo_')) {
     const promo = payload.replace('promo_', '');
+
     bot.sendMessage(
       chatId,
-      `🎉 Вот твой промокод: ${promo}\nИграй ещё, чтобы получить больше промокодов!`
+      `🎉 Умница!\n\nВот твой промокод: *${promo}*\n\nИграй ещё, чтобы получить больше промокодов 💖`,
+      { parse_mode: 'Markdown' }
     );
-  } else {
-    bot.sendMessage(chatId, 'Попробуй нашу игру! ❤️🌸');
+    return;
   }
+
+  // Обычный старт
+  bot.sendMessage(
+    chatId,
+    'Попробуй нашу игру 🎮\n\nВыиграй — получи промокод 💝'
+  );
 });
 
-app.get('/', (_, res) => {
+/**
+ * Endpoint для Render (чтобы сервис считался живым)
+ */
+app.get('/', (req, res) => {
   res.send('Bot is alive');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('Server running');
+  console.log(`Server running on port ${PORT}`);
 });
