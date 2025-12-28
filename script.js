@@ -66,14 +66,22 @@ function isDraw() {
 function endGame(type) {
   gameOver = true;
   resultEl.classList.remove("hidden");
+  statusEl.textContent = "";
+
+  // кнопки по умолчанию
+  retryBtn.classList.remove("hidden");
   tgBtn.classList.add("hidden");
 
   if (type === "win") {
     const promo = generatePromo();
-    resultTextEl.textContent = `Умница! Вот твой промокод: ${promo}`;
-    tgBtn.href =E = "https://t.me/tictictacbot";
 
-const boardEl = document.getElem
+    resultTextEl.textContent =
+      `Умница, ты выиграла промокод: ${promo}! ` +
+     n endGame(type) {
+  gameOver = true;
+  resultEl.
+
+    tgBtn.href = "https://t.me/tictictacbot"; // имя бота
     tgBtn.classList.remove("hidden");
   }
 
