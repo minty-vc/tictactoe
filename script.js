@@ -77,10 +77,8 @@ function endGame(type) {
 
     resultTextEl.textContent =
       `Умница, ты выиграла промокод: ${promo}! ` +
-     n endGame(type) {
-  gameOver = true;
-  resultEl.
-
+      'Для его активации перейди в наш Telegram-бот';
+    
     tgBtn.href = "https://t.me/tictictacbot"; // имя бота
     tgBtn.classList.remove("hidden");
   }
