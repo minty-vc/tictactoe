@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Крестики-нолики</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <h1>Крестики-нолики</h1>
-  <div id="status">Твой ход</div>
+  <div class="card">
+    <h1>Крестики-нолики</h1>
+    <p id="status">Твой ход</p>
 
-  <div id="board"></div>
+    <div id="board" class="board"></div>
 
-  <div id="result" class="hidden">
-    <p id="result-text"></p>
-    <button id="retry-btn">Попробовать ещё раз</button>
-    <a id="tg-btn" class="hidden" target="_blank">Получить в Telegram</a>
+    <div id="result" class="result hidden">
+      <p id="result-text"></p>
+
+      <button id="retry-btn" class="btn pink">
+        Попробовать ещё раз
+      </button>
+
+      <a id="tg-btn" class="btn blue hidden" target="_blank">
+        Получить в Telegram ❤️
+      </a>
+    </div>
   </div>
 
   <script src="script.js"></script>
