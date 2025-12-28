@@ -79,12 +79,12 @@ const boardEl = document.getElem
 
   if (type === "lose") {
     resultTextEl.textContent =
-      "Ой, сегодня не твой день, попробуешь ещё раз?";
+      "Ой, я случайно! Попробуешь ещё раз?";
   }
 
   if (type === "draw") {
     resultTextEl.textContent =
-      "Ой, ничья! Попробуй ещё раз";
+      "Ничья! Попробуй ещё раз";
   }
 }
 
